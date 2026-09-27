@@ -2,7 +2,15 @@ import { forwardRef } from "react";
 import type { ButtonHTMLAttributes } from "react";
 import { motion } from "framer-motion";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+type ConflictingMotionProps =
+  | "onAnimationStart"
+  | "onAnimationEnd"
+  | "onAnimationIteration"
+  | "onDrag"
+  | "onDragStart"
+  | "onDragEnd";
+
+interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, ConflictingMotionProps> {
   variant?: "primary" | "ghost";
   isLoading?: boolean;
 }

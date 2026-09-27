@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@fontsource/fraunces": "^5.1.0",
+    "@types/node": "^22.9.0",
     "@fontsource/ibm-plex-sans": "^5.1.0",
     "axios": "^1.7.7",
     "chess.js": "^1.0.0",
