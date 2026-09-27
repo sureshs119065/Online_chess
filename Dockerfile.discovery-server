@@ -1,0 +1,15 @@
+# Multi-stage: stage 1 builds the whole multi-module project with Maven
+# (needs the full repo context, since every service depends on
+# common-lib), stage 2 copies out just discovery-server's jar into a
+# slim runtime image.
+
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /workspace
+COPY . .
+RUN mvn -pl common-lib -am install -DskipTests \
+ && mvn -pl discovery-server -am clean package -DskipTests
+
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=build /workspace/discovery-server/target/discovery-server.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
