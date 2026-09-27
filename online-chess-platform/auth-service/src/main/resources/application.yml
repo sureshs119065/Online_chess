@@ -1,0 +1,83 @@
+server:
+  port: ${PORT:8081}
+
+spring:
+  application:
+    name: auth-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  jpa:
+    hibernate:
+      ddl-auto: validate   # schema is owned by Flyway migrations, not Hibernate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+# Never hardcode this — set JWT_SECRET as an env var locally (.env) and again
+# in Render/Railway's dashboard. Must be identical across every service that
+# validates tokens (auth-service, api-gateway) or JWTs issued by one won't
+# validate on the other.
+jwt:
+  secret: ${JWT_SECRET}
+  access-ttl-minutes: ${JWT_ACCESS_TTL_MINUTES:15}
+  refresh-ttl-days: ${JWT_REFRESH_TTL_DAYS:7}
+
+# Must match game-engine-service's internal.service-key exactly — it's how
+# InternalUserController verifies a game-result update really came from
+# game-engine-service. See InternalUserController's javadoc.
+internal:
+  service-key: ${INTERNAL_SERVICE_KEY:change-me-internal-key}
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+---
+# Local dev profile — points at Supabase's direct connection (or your own
+# local Postgres if you'd rather not burn Supabase connections during dev;
+# swap the url below to jdbc:postgresql://localhost:5432/chess if so).
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:postgresql://gavdfobppjgqkhxjeimn.supabase.co:5432/postgres
+    username: ${SUPABASE_DB_USER:postgres}
+    password: ${SUPABASE_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+---
+# Production profile for Render/Railway. Same Supabase project, but through
+# the connection pooler (port 6543, "Transaction" mode) since a free-tier
+# host may spin multiple short-lived connections — the direct port (5432)
+# exhausts Postgres's max connections faster than the pooler does.
+# Activate with SPRING_PROFILES_ACTIVE=render (or =prod, name doesn't matter
+# as long as it matches what you set in the host's env vars).
+spring:
+  config:
+    activate:
+      on-profile: render
+  datasource:
+    url: jdbc:postgresql://gavdfobppjgqkhxjeimn.supabase.co:5432/postgres
+    username: ${SUPABASE_DB_USER:postgres.gavdfobppjgqkhxjeimn}
+    password: ${SUPABASE_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+# Per the Session 1 free-tier note: if you decide not to deploy
+# discovery-server/config-server in production, set EUREKA_ENABLED=false in
+# this service's Render/Railway env vars — everything above already reads
+# that var, no code change needed either way.

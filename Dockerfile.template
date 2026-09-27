@@ -1,0 +1,29 @@
+# OPTIONAL — not needed for the recommended Render deployment path, which
+# builds straight from Maven with no Dockerfile at all (see each service's
+# section in README.md: "Build command: mvn -pl <service> -am clean
+# package -DskipTests", "Start command: java -jar <service>/target/*.jar").
+#
+# This exists only for the day you might want a host that specifically
+# requires a container (Fly.io, Google Cloud Run, Railway's Docker-based
+# deploy flow, etc.). Copy this into the repo root as `Dockerfile.<service>`
+# or pass --build-arg, adjusting SERVICE_NAME, and build/run it like:
+#   docker build -t auth-service --build-arg SERVICE_NAME=auth-service -f Dockerfile.template .
+#   docker run -p 8081:8081 --env-file .env auth-service
+#
+# Multi-stage: stage 1 builds the whole multi-module project with Maven
+# (needs the full repo context, since every service depends on
+# common-lib), stage 2 copies out just the one service's jar into a slim
+# runtime image.
+
+FROM maven:3.9-eclipse-temurin-17 AS build
+ARG SERVICE_NAME
+WORKDIR /workspace
+COPY . .
+RUN mvn -pl common-lib -am install -DskipTests \
+ && mvn -pl ${SERVICE_NAME} -am clean package -DskipTests
+
+FROM eclipse-temurin:17-jre-alpine
+ARG SERVICE_NAME
+WORKDIR /app
+COPY --from=build /workspace/${SERVICE_NAME}/target/${SERVICE_NAME}.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.chess</groupId>
+  <artifactId>online-chess-platform</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+
+  <!--
+    SESSION 1 modules only for now: discovery-server, config-server.
+    Add the rest (common-lib, api-gateway, auth-service, matchmaking-service,
+    game-engine-service, chat-service, notification-service) here as you
+    generate them in later sessions — Maven will just ignore a module entry
+    if the folder doesn't exist yet only if you comment it out, so keep
+    this list in sync with what actually exists on disk.
+  -->
+  <modules>
+    <module>discovery-server</module>
+    <module>config-server</module>
+    <module>common-lib</module>
+    <module>auth-service</module>
+    <module>game-engine-service</module>
+    <module>matchmaking-service</module>
+    <module>chat-service</module>
+    <module>notification-service</module>
+    <module>api-gateway</module>
+  </modules>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.3.2</version>
+    <relativePath/>
+  </parent>
+
+  <properties>
+    <java.version>17</java.version>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <spring-cloud.version>2023.0.3</spring-cloud.version>
+    <jjwt.version>0.12.6</jjwt.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${spring-cloud.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+</project>

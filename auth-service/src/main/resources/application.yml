@@ -1,0 +1,78 @@
+server:
+  port: ${PORT:8081}
+
+spring:
+  application:
+    name: auth-service
+  jpa:
+    hibernate:
+      ddl-auto: validate   # schema is owned by Flyway migrations, not Hibernate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # Every service shares one physical database (and the default "public"
+    # schema), so without this, Flyway's history table - normally just
+    # "flyway_schema_history" - would be shared across all of them too.
+    # Each service then has its own "version 1", "version 2", etc. with
+    # totally different file contents, and Flyway rejects that as a
+    # checksum mismatch the moment a second service starts up. Giving each
+    # service its own table name keeps their migration histories
+    # completely independent even though the tables they create all live
+    # in the same database.
+    table: flyway_history_auth
+
+  # Plain PostgreSQL - no vendor-specific pooler/URL quirks to worry about,
+  # since neither a locally installed Postgres nor Render's free Postgres
+  # needs one. Same five env vars everywhere this service runs:
+  #   - Local dev: install Postgres natively (see README), create a
+  #     `chess_platform` database, and put its values in .env. DB_HOST
+  #     defaults to localhost so most of the time you only need to set
+  #     DB_PASSWORD.
+  #   - Render: create a free Postgres instance in Render's dashboard, copy
+  #     its Hostname/Port/Database/Username/Password into this service's
+  #     environment variables (Render's *Internal* connection info, not the
+  #     External one, since this service also runs on Render).
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:chess_platform}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      # Render's free Postgres instance has a limited connection budget
+      # shared across every service that talks to it - keep each service's
+      # pool small rather than Hikari's default of 10, since five services
+      # will all be connecting to the same free instance at once.
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+
+# Never hardcode this - set JWT_SECRET as an env var locally (.env) and again
+# in Render's dashboard. Must be identical across every service that
+# validates tokens (auth-service, api-gateway) or JWTs issued by one won't
+# validate on the other.
+jwt:
+  secret: ${JWT_SECRET}
+  access-ttl-minutes: ${JWT_ACCESS_TTL_MINUTES:15}
+  refresh-ttl-days: ${JWT_REFRESH_TTL_DAYS:7}
+
+# Must match game-engine-service's internal.service-key exactly - it's how
+# InternalUserController verifies a game-result update really came from
+# game-engine-service. See InternalUserController's javadoc.
+internal:
+  service-key: ${INTERNAL_SERVICE_KEY:change-me-internal-key}
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

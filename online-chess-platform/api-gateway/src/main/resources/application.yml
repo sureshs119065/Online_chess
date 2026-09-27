@@ -1,0 +1,79 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # --- REST routes ---
+        # auth-service handles both /api/auth/** and /api/users/**
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/auth/**,/api/users/**
+
+        # More specific than the game-engine-service route below, so it
+        # MUST come first — Spring Cloud Gateway matches routes in the
+        # order they're defined and takes the first match.
+        - id: chat-service-rest
+          uri: ${CHAT_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/games/*/chat/**
+
+        - id: game-engine-service
+          uri: ${GAME_ENGINE_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/games/**
+
+        - id: matchmaking-service
+          uri: ${MATCHMAKING_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/matchmaking/**
+
+        - id: notification-service
+          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/notifications/**
+
+        # --- WebSocket routes ---
+        # Separate ws:// URLs rather than reusing the http:// ones above —
+        # Spring Cloud Gateway proxies WebSocket upgrades when the route's
+        # URI scheme is ws/wss. Point these at the same host:port as the
+        # matching REST route, just with the scheme swapped.
+        - id: game-engine-ws
+          uri: ${GAME_ENGINE_SERVICE_WS_URL:ws://localhost:8083}
+          predicates:
+            - Path=/ws/game/**
+
+        - id: chat-service-ws
+          uri: ${CHAT_SERVICE_WS_URL:ws://localhost:8084}
+          predicates:
+            - Path=/ws/chat/**
+
+        - id: matchmaking-service-ws
+          uri: ${MATCHMAKING_SERVICE_WS_URL:ws://localhost:8082}
+          predicates:
+            - Path=/ws/matchmaking/**
+
+# Must match auth-service's jwt.secret exactly — see GatewayJwtService.
+jwt:
+  secret: ${JWT_SECRET}
+
+cors:
+  allowed-origin: ${FRONTEND_ORIGIN:*}
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway

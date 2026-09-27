@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.chess</groupId>
+    <artifactId>online-chess-platform</artifactId>
+    <version>1.0.0</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>common-lib</artifactId>
+  <packaging>jar</packaging>
+
+  <!--
+    Plain library jar — deliberately NOT a Spring Boot application module:
+    no spring-boot-maven-plugin, no main class, no application.yml. Every
+    other service pulls this in as a normal Maven dependency (see file
+    05-CONFIG-SAMPLES.md for the pattern) to reuse JwtUtil and the error DTOs
+    instead of copy-pasting them into each service.
+  -->
+
+  <dependencies>
+    <!-- Just enough Spring Web to use ResponseEntity / @ExceptionHandler in
+         GlobalExceptionHandlerBase — NOT spring-boot-starter-web, since this
+         isn't a runnable app and shouldn't pull in an embedded Tomcat. -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+    </dependency>
+
+    <!-- JWT: jjwt 0.12.x split into api/impl/jackson artifacts.
+         api is compile-scope (types used in method signatures elsewhere),
+         impl + jackson are runtime-only — consuming services don't need to
+         see them directly. -->
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-api</artifactId>
+      <version>${jjwt.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-impl</artifactId>
+      <version>${jjwt.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-jackson</artifactId>
+      <version>${jjwt.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+</project>

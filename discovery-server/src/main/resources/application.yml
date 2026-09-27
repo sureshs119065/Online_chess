@@ -1,0 +1,33 @@
+server:
+  port: ${PORT:8761}
+
+spring:
+  application:
+    name: discovery-server
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    # A standalone registry doesn't need to register with itself or fetch
+    # its own registry.
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+
+---
+# Activate with: --spring.profiles.active=render  (or SPRING_PROFILES_ACTIVE=render)
+# Use this profile ONLY if you decide to actually deploy Eureka (see the note
+# in DiscoveryServerApplication.java). Render injects PORT automatically, so
+# server.port above already handles that; this profile mainly exists so you
+# have an obvious place to add prod-only overrides later (e.g. hostname).
+spring:
+  config:
+    activate:
+      on-profile: render
+
+eureka:
+  instance:
+    hostname: ${RENDER_EXTERNAL_HOSTNAME:localhost}
+    prefer-ip-address: false

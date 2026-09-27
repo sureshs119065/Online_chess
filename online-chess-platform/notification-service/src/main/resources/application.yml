@@ -1,0 +1,85 @@
+server:
+  port: ${PORT:8085}
+
+spring:
+  application:
+    name: notification-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  # RabbitMQ connection. This service and game-engine-service (the
+  # publisher) MUST point at the exact same broker/vhost/credentials, or
+  # neither side's declared exchange/queues will ever see each other's
+  # traffic. See the README's Session 7 section for the recommended
+  # CloudAMQP free-tier setup (no Docker, no local install needed —
+  # decompose its dashboard connection info into the individual fields
+  # below rather than using its single amqp:// URL string, since Spring
+  # Boot's spring.rabbitmq.addresses doesn't reliably parse embedded
+  # credentials from a full URI).
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    ssl:
+      enabled: ${RABBITMQ_SSL_ENABLED:false}
+    listener:
+      simple:
+        # Don't retry forever on a message that keeps failing to parse —
+        # log it (see GameEventListener) and move on rather than blocking
+        # the queue. A production system would route failures to a
+        # dead-letter queue instead; out of scope for this project.
+        default-requeue-rejected: false
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: ${SUPABASE_DB_URL:jdbc:postgresql://<PROJECT-REF>.supabase.co:5432/postgres}
+    username: ${SUPABASE_DB_USER:postgres}
+    password: ${SUPABASE_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+---
+# Activate with SPRING_PROFILES_ACTIVE=render. Same pooler-port reasoning
+# as every other service — see auth-service's application.yml note. The
+# RabbitMQ block above already reads from env vars either way, so nothing
+# RabbitMQ-specific needs to change between profiles — only the values you
+# set for RABBITMQ_* differ if you use separate CloudAMQP instances for
+# local vs. deployed (you don't have to; one free instance can serve both).
+spring:
+  config:
+    activate:
+      on-profile: render
+  datasource:
+    url: ${SUPABASE_DB_URL:jdbc:postgresql://<PROJECT-REF>.pooler.supabase.com:6543/postgres?prepareThreshold=0}
+    username: ${SUPABASE_DB_USER:postgres.<PROJECT-REF>}
+    password: ${SUPABASE_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver

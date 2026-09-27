@@ -1,0 +1,83 @@
+server:
+  port: ${PORT:8083}
+
+spring:
+  application:
+    name: game-engine-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  # Must point at the same broker/vhost/credentials as notification-service's
+  # spring.rabbitmq.* block (Session 7) — see that service's application.yml
+  # for the full explanation and the recommended CloudAMQP free-tier setup.
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    ssl:
+      enabled: ${RABBITMQ_SSL_ENABLED:false}
+
+# Where to reach auth-service for ELO reads/writes (EloUpdateClient).
+# Local dev: the default below (localhost:8081) just works if auth-service
+# is running per Session 3. On Render/Railway, set this to that service's
+# public URL as an env var.
+services:
+  auth-service:
+    url: ${AUTH_SERVICE_URL:http://localhost:8081}
+
+# Must match the same value configured on auth-service's internal endpoint
+# (InternalUserController) — see that service's application.yml addition.
+internal:
+  service-key: ${INTERNAL_SERVICE_KEY:change-me-internal-key}
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: ${SUPABASE_DB_URL:jdbc:postgresql://<PROJECT-REF>.supabase.co:5432/postgres}
+    username: ${SUPABASE_DB_USER:postgres}
+    password: ${SUPABASE_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+---
+# Activate with SPRING_PROFILES_ACTIVE=render on Render/Railway. Uses the
+# Supabase connection pooler (port 6543) — see the Session 3 README note on
+# why that matters for a host that may spin up multiple short-lived
+# connections. If skipping discovery-server/config-server in prod, also set
+# EUREKA_ENABLED=false.
+spring:
+  config:
+    activate:
+      on-profile: render
+  datasource:
+    url: ${SUPABASE_DB_URL:jdbc:postgresql://<PROJECT-REF>.pooler.supabase.com:6543/postgres?prepareThreshold=0}
+    username: ${SUPABASE_DB_USER:postgres.<PROJECT-REF>}
+    password: ${SUPABASE_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver

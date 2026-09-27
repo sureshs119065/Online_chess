@@ -1,0 +1,62 @@
+server:
+  port: ${PORT:8082}
+
+spring:
+  application:
+    name: matchmaking-service
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # See auth-service's application.yml comment for why this is needed -
+    # every service shares one physical database, so each needs its own
+    # Flyway history table to avoid a checksum collision with the others'
+    # unrelated "version 1" migrations.
+    table: flyway_history_matchmaking
+
+  # Plain PostgreSQL - same DB_* env vars as every other service, see
+  # auth-service's application.yml for the full explanation.
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:chess_platform}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+
+# Where to reach the other two services this one talks to. Local dev:
+# defaults just work if auth-service and game-engine-service are running
+# per their own Sessions. On Render, override both with the deployed URLs
+# as env vars.
+services:
+  auth-service:
+    url: ${AUTH_SERVICE_URL:http://localhost:8081}
+  game-engine-service:
+    url: ${GAME_ENGINE_SERVICE_URL:http://localhost:8083}
+
+# Must match auth-service's jwt.secret exactly - used to verify the token
+# passed as a WS query param during the /ws/matchmaking handshake
+# (JwtHandshakeInterceptor), since a browser can't set an Authorization
+# header on a WebSocket upgrade request.
+jwt:
+  secret: ${JWT_SECRET}
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

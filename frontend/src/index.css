@@ -1,0 +1,47 @@
+@import "@fontsource/fraunces/400.css";
+@import "@fontsource/fraunces/500.css";
+@import "@fontsource/fraunces/600.css";
+@import "@fontsource/fraunces/400-italic.css";
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-base text-ivory font-sans antialiased;
+  }
+
+  /* Visible keyboard focus everywhere, in the brass accent rather than a
+     browser-default blue that would clash with the palette. Never removed
+     without a replacement - see frontend-design skill's quality floor. */
+  :focus-visible {
+    outline: 2px solid theme("colors.brass");
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: theme("colors.brass");
+    color: theme("colors.base");
+  }
+}
+
+@layer utilities {
+  /* Respect reduced-motion preference: anything using this utility
+     collapses to an instant state change instead of animating. */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
