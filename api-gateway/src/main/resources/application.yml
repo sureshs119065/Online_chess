@@ -6,6 +6,20 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - ${FRONTEND_ORIGIN:*}
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
       routes:
         # --- REST routes ---
         # auth-service handles both /api/auth/** and /api/users/**
@@ -60,9 +74,6 @@ spring:
 # Must match auth-service's jwt.secret exactly — see GatewayJwtService.
 jwt:
   secret: ${JWT_SECRET}
-
-cors:
-  allowed-origin: ${FRONTEND_ORIGIN:*}
 
 eureka:
   client:
