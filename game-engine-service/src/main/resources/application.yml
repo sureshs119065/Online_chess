@@ -14,11 +14,9 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-    # See auth-service's application.yml comment for why this is needed -
-    # every service shares one physical database, so each needs its own
-    # Flyway history table to avoid a checksum collision with the others'
-    # unrelated "version 1" migrations.
     table: flyway_history_game_engine
+    baseline-on-migrate: true
+    baseline-version: "0"
 
   # Plain PostgreSQL - same DB_* env vars as every other service, see
   # auth-service's application.yml for the full explanation. Local dev:
