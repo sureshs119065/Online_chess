@@ -8,6 +8,8 @@ export interface TimeControlOption {
 
 // Values match the "<category>_<minutes>" format GameService.
 // parseTimeControlMillis expects on the backend.
+const ICONS: Record<string, string> = { bullet_1: "♙", blitz_5: "♘", rapid_10: "♗", classical_30: "♔" };
+
 export const TIME_CONTROLS: TimeControlOption[] = [
   { value: "bullet_1", label: "Bullet", sublabel: "1 min" },
   { value: "blitz_5", label: "Blitz", sublabel: "5 min" },
@@ -28,11 +30,16 @@ export function TimeControlPicker({ value, onChange, disabled }: TimeControlPick
       aria-label="Time control"
       className="grid grid-cols-2 gap-2 rounded-sm border border-brass-dim/40 bg-surface p-2 sm:grid-cols-4"
     >
-      {TIME_CONTROLS.map((option) => {
+      {TIME_CONTROLS.map((option, index) => {
         const isSelected = option.value === value;
         return (
-          <button
+          <motion.button
             key={option.value}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 + index * 0.07, type: "spring", stiffness: 380, damping: 28 }}
+            whileHover={disabled ? undefined : { y: -3 }}
+            whileTap={{ scale: 0.97 }}
             type="button"
             role="radio"
             aria-checked={isSelected}
@@ -47,8 +54,9 @@ export function TimeControlPicker({ value, onChange, disabled }: TimeControlPick
                 transition={{ type: "spring", stiffness: 500, damping: 35 }}
               />
             )}
+            <span className="relative z-10 block text-xl leading-none">{ICONS[option.value]}</span>
             <span
-              className={`relative z-10 block font-display text-base ${
+              className={`relative z-10 mt-1 block font-display text-base ${
                 isSelected ? "text-base" : "text-ivory"
               }`}
             >
@@ -61,7 +69,7 @@ export function TimeControlPicker({ value, onChange, disabled }: TimeControlPick
             >
               {option.sublabel}
             </span>
-          </button>
+          </motion.button>
         );
       })}
     </div>

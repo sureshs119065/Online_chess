@@ -30,7 +30,7 @@ export function Square({
       style={{ top: `${row * 12.5}%`, left: `${col * 12.5}%` }}
       className={`absolute flex h-[12.5%] w-[12.5%] items-center justify-center transition-colors duration-150 ${
         isLight ? "bg-surface-raised" : "bg-surface"
-      } ${isLastMove ? "after:absolute after:inset-0 after:bg-brass/20" : ""}`}
+      } ${isLastMove ? "after:absolute after:inset-0 after:bg-brass/25 after:animate-[pop_0.45s_ease-out]" : ""}`}
     >
       {isCheck && (
         <span className="absolute inset-0 rounded-full bg-brick/60 blur-md" aria-hidden />

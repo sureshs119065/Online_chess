@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Square } from "@/components/board/Square";
 import { Piece } from "@/components/board/Piece";
 import { PromotionPicker } from "@/components/board/PromotionPicker";
@@ -113,8 +113,11 @@ export function ChessBoard({
   }
 
   return (
-    <div
-      className="relative aspect-square w-full max-w-[640px] overflow-hidden rounded-sm border border-brass-dim/40"
+    <motion.div
+      initial={{ opacity: 0, scale: 0.94, rotateX: 8 }}
+      animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+      transition={{ duration: 0.55, ease: "easeOut" }}
+      className="relative aspect-square shadow-[0_24px_60px_-20px_rgba(0,0,0,0.8),0_0_60px_-30px_rgba(201,162,75,0.5)] w-full max-w-[640px] overflow-hidden rounded-sm border border-brass-dim/40"
       style={{ containerType: "inline-size" }}
     >
       {squares}
@@ -139,6 +142,6 @@ export function ChessBoard({
           />
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }

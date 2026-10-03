@@ -113,8 +113,22 @@ export function LobbyPage() {
             className="flex w-full flex-col items-center gap-8"
           >
             <div>
-              <h1 className="font-display text-3xl text-ivory">Find a game</h1>
-              <p className="mt-2 text-ivory-muted">Pick a time control and we'll match you by rating.</p>
+              <motion.h1
+                initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="font-display text-4xl text-ivory"
+              >
+                Find a game
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.25, duration: 0.6 }}
+                className="mt-2 text-ivory-muted"
+              >
+                Pick a time control and we'll match you by rating.
+              </motion.p>
             </div>
 
             <TimeControlPicker value={timeControl} onChange={setTimeControl} />
@@ -158,14 +172,18 @@ export function LobbyPage() {
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="flex w-full flex-col items-center gap-4"
           >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
-              className="flex h-16 w-16 items-center justify-center rounded-full bg-sage text-2xl text-base"
-            >
-              ✓
-            </motion.div>
+            <div className="relative flex h-16 w-16 items-center justify-center">
+              <span aria-hidden className="absolute inset-0 animate-[ring_1.1s_ease-out] rounded-full border-2 border-sage" />
+              <span aria-hidden className="absolute inset-0 animate-[ring_1.1s_ease-out_0.25s_both] rounded-full border border-sage/70" />
+              <motion.div
+                initial={{ scale: 0, rotate: -90 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
+                className="flex h-16 w-16 items-center justify-center rounded-full bg-sage text-2xl text-base"
+              >
+                ✓
+              </motion.div>
+            </div>
             <p className="font-display text-2xl text-ivory">Match found</p>
             <p className="text-ivory-muted">
               Playing as {matchInfo?.yourColor === "WHITE" ? "White" : "Black"}

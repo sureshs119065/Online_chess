@@ -1,3 +1,4 @@
+import { AmbientBackground } from "@/components/layout/AmbientBackground";
 import type { ReactNode } from "react";
 import { AnimatedBoardHero } from "@/components/board/AnimatedBoardHero";
 
@@ -8,9 +9,10 @@ interface AuthLayoutProps {
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
+      <AmbientBackground />
       {/* Hero side - hidden below lg, since the board doesn't earn its
           space on a phone-width screen and the form should get full focus. */}
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-surface p-12 lg:flex">
+      <div className="relative hidden flex-col justify-between overflow-hidden border-r border-brass-dim/20 bg-surface/50 p-12 backdrop-blur-sm lg:flex">
         <a href="/" className="font-display text-xl text-ivory">
           Endgame
         </a>

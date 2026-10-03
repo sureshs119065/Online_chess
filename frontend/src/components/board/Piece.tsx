@@ -35,7 +35,7 @@ export function Piece({ piece, orientation, isDragOrigin }: PieceProps) {
       // glyphs scale with the board instead of overflowing small squares.
       style={{ fontSize: "9cqw" }}
     >
-      <span className={piece.color === "w" ? "text-ivory" : "text-brass"}>
+      <span className={`drop-shadow-[0_3px_3px_rgba(0,0,0,0.55)] ${piece.color === "w" ? "text-ivory" : "text-brass"}`}>
         {GLYPHS[`${piece.color}${piece.type}`]}
       </span>
     </motion.div>
