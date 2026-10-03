@@ -97,7 +97,7 @@ export function GamePage() {
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 lg:flex-row lg:items-start lg:justify-center">
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex w-full max-w-[640px] flex-col gap-3 lg:flex-1">
         {/* Opponent bar */}
         <div className="flex w-full max-w-[640px] items-center justify-between">
           <div>
@@ -146,7 +146,7 @@ export function GamePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               role="alert"
-              className="text-sm text-brick"
+              className="text-center text-sm text-brick"
             >
               {wsErrorMessage}
             </motion.p>
@@ -154,13 +154,13 @@ export function GamePage() {
         </AnimatePresence>
 
         {!isGameOver && (
-          <Button variant="ghost" onClick={handleResignClick} className="mt-2">
+          <Button variant="ghost" onClick={handleResignClick} className="mt-2 self-center">
             {resignArmed ? "Click again to confirm resignation" : "Resign"}
           </Button>
         )}
       </div>
 
-      <div className="w-full lg:w-72">
+      <div className="w-full lg:w-72 lg:shrink-0">
         <div className="mb-2 flex gap-1 rounded-sm border border-brass-dim/30 bg-surface p-1">
           <button
             type="button"

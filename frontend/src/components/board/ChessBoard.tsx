@@ -113,7 +113,10 @@ export function ChessBoard({
   }
 
   return (
-    <div className="relative aspect-square w-full max-w-[640px] overflow-hidden rounded-sm border border-brass-dim/40">
+    <div
+      className="relative aspect-square w-full max-w-[640px] overflow-hidden rounded-sm border border-brass-dim/40"
+      style={{ containerType: "inline-size" }}
+    >
       {squares}
 
       <AnimatePresence>

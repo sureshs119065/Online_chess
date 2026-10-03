@@ -5,7 +5,7 @@ export type WsStatus = "idle" | "connecting" | "open" | "closed" | "error";
 interface UseWebSocketOptions {
   /** Called with each parsed JSON message. */
   onMessage: (data: unknown) => void;
-  /** Max automatic reconnect attempts before giving up. Default 3. */
+  /** Max automatic reconnect attempts before giving up. Default 8 (free hosts take a while to wake). */
   maxRetries?: number;
 }
 
@@ -20,7 +20,7 @@ interface UseWebSocketOptions {
  * once. Pass `url: null` to stay disconnected (e.g. before the person has
  * clicked "Find match").
  */
-export function useWebSocket(url: string | null, { onMessage, maxRetries = 3 }: UseWebSocketOptions) {
+export function useWebSocket(url: string | null, { onMessage, maxRetries = 8 }: UseWebSocketOptions) {
   const [status, setStatus] = useState<WsStatus>("idle");
   const socketRef = useRef<WebSocket | null>(null);
   const retriesRef = useRef(0);
@@ -69,7 +69,7 @@ export function useWebSocket(url: string | null, { onMessage, maxRetries = 3 }: 
           retriesRef.current += 1;
           setTimeout(() => {
             if (!cancelled) connect(targetUrl);
-          }, 1500);
+          }, Math.min(1500 * retriesRef.current, 8000));
         }
       };
     }
@@ -83,10 +83,13 @@ export function useWebSocket(url: string | null, { onMessage, maxRetries = 3 }: 
     };
   }, [url, maxRetries]);
 
-  function send(data: unknown) {
+  /** Returns true if the frame was actually handed to an open socket. */
+  function send(data: unknown): boolean {
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       socketRef.current.send(JSON.stringify(data));
+      return true;
     }
+    return false;
   }
 
   return { status, send };

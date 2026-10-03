@@ -21,7 +21,6 @@ export function Piece({ piece, orientation, isDragOrigin }: PieceProps) {
 
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, scale: 0.5 }}
       animate={{
         opacity: isDragOrigin ? 0.35 : 1,
@@ -31,7 +30,10 @@ export function Piece({ piece, orientation, isDragOrigin }: PieceProps) {
       }}
       exit={{ opacity: 0, scale: 0.4 }}
       transition={{ type: "spring", stiffness: 500, damping: 32 }}
-      className="pointer-events-none absolute flex h-[12.5%] w-[12.5%] select-none items-center justify-center text-4xl sm:text-5xl"
+      className="pointer-events-none absolute flex h-[12.5%] w-[12.5%] select-none items-center justify-center leading-none"
+      // cqw = % of the board's width (see containerType on ChessBoard), so
+      // glyphs scale with the board instead of overflowing small squares.
+      style={{ fontSize: "9cqw" }}
     >
       <span className={piece.color === "w" ? "text-ivory" : "text-brass"}>
         {GLYPHS[`${piece.color}${piece.type}`]}

@@ -44,9 +44,9 @@ export function useChatSocket(gameId: string, senderId: string) {
   });
 
   const sendMessage = useCallback(
-    (message: string) => {
-      if (!message.trim()) return;
-      send({ senderId, message: message.trim() });
+    (message: string): boolean => {
+      if (!message.trim()) return false;
+      return send({ senderId, message: message.trim() });
     },
     [send, senderId],
   );
