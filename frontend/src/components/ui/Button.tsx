@@ -1,8 +1,13 @@
 import { forwardRef } from "react";
-import type { ButtonHTMLAttributes } from "react";
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
+import type { HTMLMotionProps } from "framer-motion";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+// HTMLMotionProps (not plain button attributes): motion.button's animation
+// event handlers have different signatures than the DOM ones, which made
+// `tsc -b` fail when spreading raw ButtonHTMLAttributes onto it.
+interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
+  children?: ReactNode;
   variant?: "primary" | "ghost";
   isLoading?: boolean;
 }
